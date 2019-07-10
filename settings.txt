@@ -23,7 +23,7 @@ pygame 導入
     "python.linting.pep8Enabled": false,  
     "python.linting.flake8Args": [
         //無視するエラーメッセージ
-        "--ignore=W293, W504",
+        "--ignore=W293, W504, E261, E302, E305, F405, F403",
 
         "--max-complexity", "20"
     ],
