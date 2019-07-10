@@ -1,5 +1,35 @@
-Test
-２回目
-３回目
-MASTR MASTER
-MASTER Test
+/*
+DestTop Python 環境
+
+python 3.5.4
+pylint 導入
+flake8 導入
+autopep8 導入
+pygame 導入
+*/
+
+{
+    "git.autofetch": true,
+
+    /*pylint停止してflake8の起動*/
+    "python.linting.pylintEnabled": false, 
+    "python.linting.flake8Enabled": true, 
+
+    /*自動更新*/
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "python.linting.lintOnSave": true,
+
+    "python.linting.pep8Enabled": false,  
+    "python.linting.flake8Args": [
+        //無視するエラーメッセージ
+        "--ignore=W293, W504",
+
+        "--max-complexity", "20"
+    ],
+
+    "python.formatting.provider": "autopep8",
+    "python.formatting.autopep8Args": [
+        "--aggressive", "--aggressive",
+    ],
+}
