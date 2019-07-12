@@ -11,11 +11,13 @@ Class スプライトの作成
 UPdateを使用することで移動することができる
 Drawを使う場合は、screenを引数で持って行く
 """
-class MySprite(pygame.sprite.Sprite):
+class MyPlayer(pygame.sprite.Sprite):
     # コンストラクタ
     # Filenameはファイル名
     # x,yはファイルの座標位置
     # vx,vyは動く移動量
+    # delayはそのままだと早すぎるため遅くする処理
+    # moveflgは押されているkeyの取得
     def __init__(self, filename, x, y, vx, vy):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(filename).convert_alpha()
@@ -24,17 +26,45 @@ class MySprite(pygame.sprite.Sprite):
         self.rect = Rect(x, y, width, height)
         self.vx = vx
         self.vy = vy
+        self.delay = 0
+        self.moveflg = 0
         
     # Updateを呼び出すことで画像の移動が可能
     def update(self):
-        self.rect.move_ip(self.vx, self.vy)
-        # 壁にぶつかったら跳ね返る
-        if self.rect.left < 0 or self.rect.right > SCR_RECT.width:
-            self.vx = -self.vx
-        if self.rect.top < 0 or self.rect.bottom > SCR_RECT.height:
-            self.vy = -self.vy
-        # 画面からはみ出ないようにする
-        self.rect = self.rect.clamp(SCR_RECT)
+        self.delay += 1
+        if self.delay % 2 == 0:
+            # 移動量の計算
+            if self.moveflg != 0:
+                # X軸の移動量の計算
+                if self.moveflg % 4 % 3 == 1:
+                    self.vx = 1
+                elif self.moveflg % 4 % 3 == 2:
+                    self.vx = -1
+                else:
+                    self.vx = 0
+
+            # Y軸の移動量の計算
+                if self.moveflg / 4 == 3:
+                    self.vy = 0
+                elif self.moveflg / 4 >= 2:
+                    self.vy = 1
+                elif self.moveflg / 4 >= 1:
+                    self.vy = -1
+                else:
+                    self.vy = 0
+            else:
+                self.vx = 0
+                self.vy = 0
+
+            self.rect.move_ip(self.vx, self.vy)
+
+            # 壁にぶつかったら移動量０
+            if self.rect.left < 0 or self.rect.right > SCR_RECT.width:
+                self.vx = 0
+            if self.rect.top < 0 or self.rect.bottom > SCR_RECT.height:
+                self.vy = 0
+            # 画面からはみ出ないようにする
+            self.rect = self.rect.clamp(SCR_RECT)
     
     # 画像を描画する。要：screen
     def draw(self, screen):
@@ -44,20 +74,24 @@ class MySprite(pygame.sprite.Sprite):
     def movestart(self, xyflg):
         # xyflg 0~3 0 = 右 | 1 = 左 | 2 = 上 | 3 = 下 |
         if xyflg == 0:
-            self.vx = 1
+            self.moveflg += 1
         elif xyflg == 1:
-            self.vx = -1
+            self.moveflg += 2
         elif xyflg == 2:
-            self.vy = -1
+            self.moveflg += 4
         elif xyflg == 3:
-            self.vy = 1
+            self.moveflg += 8
 
     def movestop(self, xyflg):
         # xyflg | 0~3 | 0 = 右 | 1 = 左 | 2 = 上 | 3 = 下 |
-        if xyflg <= 1:
-            self.vx = 0
-        elif xyflg <= 3:
-            self.vy = 0
+        if xyflg == 0:
+            self.moveflg -= 1
+        elif xyflg == 1:
+            self.moveflg -= 2
+        elif xyflg == 2:
+            self.moveflg -= 4
+        elif xyflg == 3:
+            self.moveflg -= 8
 
 def main():
     # 初期セットアップ
@@ -66,7 +100,7 @@ def main():
     pygame.display.set_caption("GA Gaming") # ウィンドウの上の方に出てくるアレの指定
 
     # 自操作キャラの読み込み
-    player = MySprite("img/player.png", 50, 300, 0, 0)
+    player = MyPlayer("img/player.png", 50, 300, 0, 0)
 
     while(True):
         # 計算フェーズ
